@@ -51,8 +51,8 @@ const today = isoDay(new Date());
 const state = {
   origin: ORIGINS[0],
   dest: null,
-  custom: store.get("contrail.places", []),
-  trips: store.get("contrail.trips", []),
+  custom: store.get("aarav-airlines.places", []),
+  trips: store.get("aarav-airlines.trips", []),
   flights: [],
   sort: "price",
   flight: null,
@@ -327,7 +327,7 @@ $("#confirmBtn").addEventListener("click", () => {
     gate: `${"ABC"[Math.floor(r() * 3)]}${1 + Math.floor(r() * 30)}`,
   };
   state.trips.unshift(trip);
-  store.set("contrail.trips", state.trips);
+  store.set("aarav-airlines.trips", state.trips);
   updateTripCount();
   $("#seats").close();
   showPass(trip);
@@ -348,7 +348,7 @@ function showPass(trip) {
   $("#bpHost").innerHTML = trip.names.map((name, i) => `
     <article class="bp" style="${i ? "margin-top:16px" : ""}">
       <div class="bp-main">
-        <div class="bp-top"><span>Contrail · ${f.air.name}</span><span>${trip.cabin}</span></div>
+        <div class="bp-top"><span>Aarav Airlines${f.air.code === "AR" ? "" : ` · operated by ${f.air.name}`}</span><span>${trip.cabin}</span></div>
         <div class="bp-route">
           <div class="code">${trip.origin.code}<small>${trip.origin.city}</small></div>
           <div class="bp-path"><svg viewBox="0 0 48 24" aria-hidden="true"><use href="#jet" width="48" height="24"/></svg></div>
@@ -390,7 +390,7 @@ $("#tripList").addEventListener("click", (e) => {
   if (v) { $("#trips").close(); showPass(state.trips[+v.dataset.view]); }
   if (c) {
     const t = state.trips.splice(+c.dataset.cancel, 1)[0];
-    store.set("contrail.trips", state.trips);
+    store.set("aarav-airlines.trips", state.trips);
     updateTripCount(); renderTrips();
     toast(`Cancelled ${t.pnr}`);
   }
@@ -587,7 +587,7 @@ $("#drawerFly").addEventListener("click", () => {
 $("#drawerRemove").addEventListener("click", () => {
   const code = $("#drawer").dataset.code;
   state.custom = state.custom.filter((p) => p.code !== code);
-  store.set("contrail.places", state.custom);
+  store.set("aarav-airlines.places", state.custom);
   if (state.dest?.code === code) setDest(null, { fly: false });
   $("#drawer").close();
   refreshPlaces();
@@ -634,7 +634,7 @@ addForm.addEventListener("submit", (e) => {
     photo: f.get("photo").trim() || null, custom: true,
   };
   state.custom.push(place);
-  store.set("contrail.places", state.custom);
+  store.set("aarav-airlines.places", state.custom);
   refreshPlaces();
   addForm.reset();
   previewAdd();

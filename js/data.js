@@ -74,7 +74,7 @@ export const DESTINATIONS = [
 ];
 
 export const AIRLINES = [
-  { name: "Contrail", code: "CT", color: "#FFB547" },
+  { name: "Aarav Airlines", code: "AR", color: "#FFB547" },
   { name: "Monsoon Air", code: "MN", color: "#8EE8FF" },
   { name: "Saffron Wings", code: "SW", color: "#FF8A3D" },
   { name: "Nimbus", code: "NB", color: "#B49BFF" },

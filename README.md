@@ -1,6 +1,6 @@
 <div align="center">
 
-# ✈️ Contrail
+# ✈️ Aarav Airlines
 
 **Spin the planet. Pick a dot. We'll fly you there.**
 
