@@ -1,0 +1,217 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Contrail — book flights across a spinning globe</title>
+  <meta name="description" content="An interactive flight booking site: spin the globe, pick a destination, choose a seat and print your boarding pass.">
+  <meta name="theme-color" content="#0F1333">
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&family=Chivo+Mono:wght@500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <a class="skip" href="#search">Skip to flight search</a>
+
+  <header class="nav">
+    <a class="brand" href="#top" aria-label="Contrail home">
+      <svg viewBox="0 0 32 32" aria-hidden="true"><path d="M3 17 29 5l-9 23-4-9-13-2Z" fill="var(--sun)"/><path d="m16 19 13-14-17 12" fill="var(--flare)"/></svg>
+      Contrail
+    </a>
+    <nav aria-label="Main">
+      <a href="#destinations">Destinations</a>
+      <a href="#board">Departures</a>
+      <a href="#add">Add a place</a>
+      <button class="trips-btn" id="tripsBtn" aria-haspopup="dialog">My trips <span id="tripCount">0</span></button>
+    </nav>
+  </header>
+
+  <main id="top">
+    <!-- HERO: sky, globe and the search pass -->
+    <section class="hero" aria-labelledby="heroTitle">
+      <div class="sky" aria-hidden="true">
+        <div class="stars"></div>
+        <div class="cloud c1"></div><div class="cloud c2"></div><div class="cloud c3"></div><div class="cloud c4"></div>
+        <svg class="jet j1" viewBox="0 0 400 40"><path class="trail" d="M0 20H330"/><use href="#jet" x="330" y="8" width="48" height="24"/></svg>
+        <svg class="jet j2" viewBox="0 0 400 40"><path class="trail" d="M0 20H330"/><use href="#jet" x="330" y="8" width="48" height="24"/></svg>
+      </div>
+
+      <div class="hero-copy">
+        <h1 id="heroTitle">Spin the planet.<br>Pick a dot.<br>We'll fly you there.</h1>
+        <p class="lede">Drag the globe, tap any pink pin, or search below. Every route lights up from your home airport.</p>
+
+        <form class="pass" id="search" aria-label="Search flights">
+          <div class="pass-row route">
+            <label class="field">
+              <span>From</span>
+              <select id="from" name="from"></select>
+            </label>
+            <button type="button" class="swap" id="swap" aria-label="Surprise me with a destination" title="Surprise me">
+              <svg viewBox="0 0 24 24"><path d="M7 7h11l-3-3M17 17H6l3 3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+            <label class="field">
+              <span>To</span>
+              <select id="to" name="to"></select>
+            </label>
+          </div>
+          <div class="pass-row">
+            <label class="field"><span>Depart</span><input type="date" id="date" name="date" required></label>
+            <label class="field small"><span>Travellers</span>
+              <select id="pax" name="pax"><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option></select>
+            </label>
+            <label class="field small"><span>Cabin</span>
+              <select id="cabin" name="cabin"><option value="1">Economy</option><option value="1.6">Premium</option><option value="3.2">Business</option></select>
+            </label>
+          </div>
+          <div class="pass-foot">
+            <p id="routeInfo" class="route-info" aria-live="polite">Choose a destination to see the distance.</p>
+            <button class="btn-primary" type="submit">Find flights</button>
+          </div>
+        </form>
+      </div>
+
+      <div class="globe-wrap">
+        <canvas id="globe" aria-label="Interactive globe. Drag to spin, click a pin to choose a destination." role="img"></canvas>
+        <div class="globe-tip" id="globeTip" hidden></div>
+        <p class="globe-hint" id="globeHint">Drag to spin · tap a pin to fly there</p>
+      </div>
+    </section>
+
+    <!-- RESULTS -->
+    <section class="results" id="results" hidden aria-labelledby="resultsTitle">
+      <div class="wrap">
+        <div class="results-head">
+          <h2 id="resultsTitle">Flights</h2>
+          <div class="sort" role="radiogroup" aria-label="Sort flights">
+            <button role="radio" aria-checked="true" data-sort="price">Cheapest</button>
+            <button role="radio" aria-checked="false" data-sort="duration">Fastest</button>
+            <button role="radio" aria-checked="false" data-sort="depart">Earliest</button>
+          </div>
+        </div>
+        <div class="fare-strip" id="fareStrip" role="radiogroup" aria-label="Lowest fare by day"></div>
+        <ol class="flight-list" id="flightList"></ol>
+      </div>
+    </section>
+
+    <!-- DEPARTURES BOARD -->
+    <section class="board-sec" id="board" aria-labelledby="boardTitle">
+      <div class="wrap">
+        <h2 id="boardTitle">Leaving <span id="boardCity">Delhi</span> soon</h2>
+        <p class="sub">The board updates every few seconds. Tap a row to book that flight.</p>
+        <div class="board" role="table" aria-label="Departures">
+          <div class="board-row head" role="row">
+            <span role="columnheader">Time</span><span role="columnheader">Flight</span><span role="columnheader">Destination</span><span role="columnheader">Gate</span><span role="columnheader">Status</span>
+          </div>
+          <div id="boardRows"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- DESTINATIONS -->
+    <section class="dest-sec" id="destinations" aria-labelledby="destTitle">
+      <div class="wrap">
+        <div class="dest-head">
+          <h2 id="destTitle">Where to next?</h2>
+          <div class="chips" role="radiogroup" aria-label="Filter destinations" id="chips"></div>
+        </div>
+        <div class="dest-grid" id="destGrid"></div>
+      </div>
+    </section>
+
+    <!-- ADD YOUR OWN -->
+    <section class="add-sec" id="add" aria-labelledby="addTitle">
+      <div class="wrap add-grid">
+        <div>
+          <h2 id="addTitle">Missing a place? Pin it.</h2>
+          <p class="sub">Add any spot on Earth. It gets its own pin, route and flights, and stays saved in this browser.</p>
+          <div class="postcard-preview" id="addPreview" aria-hidden="true">
+            <div class="pc-photo"></div>
+            <div class="pc-meta"><strong>Your place</strong><span>Somewhere wonderful</span></div>
+          </div>
+        </div>
+        <form class="add-form" id="addForm">
+          <label class="field"><span>Place name</span><input name="city" required maxlength="28" placeholder="e.g. Ladakh"></label>
+          <label class="field"><span>Country</span><input name="country" required maxlength="28" placeholder="e.g. India"></label>
+          <label class="field"><span>Photo link (optional)</span><input name="photo" type="url" placeholder="https://…jpg"></label>
+          <div class="pass-row">
+            <label class="field"><span>Latitude</span><input name="lat" type="number" step="any" min="-90" max="90" required></label>
+            <label class="field"><span>Longitude</span><input name="lng" type="number" step="any" min="-180" max="180" required></label>
+          </div>
+          <button type="button" class="btn-ghost" id="pickOnGlobe">Pick the spot on the globe</button>
+          <label class="field"><span>Vibe</span>
+            <select name="vibe"><option>City</option><option>Beach</option><option>Mountain</option><option>Wonder</option></select>
+          </label>
+          <button class="btn-primary" type="submit">Add destination</button>
+          <p class="form-msg" id="addMsg" aria-live="polite"></p>
+        </form>
+      </div>
+    </section>
+  </main>
+
+  <footer class="foot">
+    <p>Contrail is a portfolio project by <a href="https://github.com/Aaravcodesss">Aarav</a>. Flights and fares are simulated — nothing here is charged or booked for real. Photos from Unsplash.</p>
+  </footer>
+
+  <!-- Destination drawer -->
+  <dialog class="drawer" id="drawer" aria-labelledby="drawerTitle">
+    <div class="drawer-photo" id="drawerPhoto"></div>
+    <div class="drawer-body">
+      <button class="close" data-close aria-label="Close">×</button>
+      <h3 id="drawerTitle"></h3>
+      <p class="drawer-country" id="drawerCountry"></p>
+      <p id="drawerBlurb"></p>
+      <dl class="facts" id="drawerFacts"></dl>
+      <div class="drawer-actions">
+        <button class="btn-primary" id="drawerFly">Fly here</button>
+        <button class="btn-ghost" id="drawerRemove" hidden>Remove this place</button>
+      </div>
+    </div>
+  </dialog>
+
+  <!-- Seat picker -->
+  <dialog class="seats" id="seats" aria-labelledby="seatsTitle">
+    <button class="close" data-close aria-label="Close">×</button>
+    <h3 id="seatsTitle">Choose your seat</h3>
+    <p class="sub" id="seatsSub"></p>
+    <div class="seat-layout">
+      <div class="cabin" id="cabinMap" role="grid" aria-label="Seat map"></div>
+      <aside class="seat-side">
+        <ul class="legend">
+          <li><i class="s free"></i>Free</li><li><i class="s extra"></i>Extra legroom +₹1,200</li><li><i class="s taken"></i>Taken</li><li><i class="s mine"></i>Your pick</li>
+        </ul>
+        <div id="paxFields"></div>
+        <p class="total" id="seatTotal"></p>
+        <button class="btn-primary" id="confirmBtn" disabled>Book and get boarding pass</button>
+      </aside>
+    </div>
+  </dialog>
+
+  <!-- Boarding pass -->
+  <dialog class="bp-dialog" id="bp" aria-labelledby="bpTitle">
+    <button class="close" data-close aria-label="Close">×</button>
+    <h3 id="bpTitle" class="sr-only">Your boarding pass</h3>
+    <div id="bpHost"></div>
+    <div class="bp-actions"><button class="btn-ghost" id="printBtn">Print pass</button><button class="btn-primary" data-close>Done</button></div>
+  </dialog>
+
+  <!-- Trips -->
+  <dialog class="trips" id="trips" aria-labelledby="tripsTitle">
+    <button class="close" data-close aria-label="Close">×</button>
+    <h3 id="tripsTitle">My trips</h3>
+    <ul id="tripList"></ul>
+  </dialog>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <canvas class="confetti" id="confetti" aria-hidden="true"></canvas>
+
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <symbol id="jet" viewBox="0 0 48 24"><path d="M47 12c0-1.4-1.6-2-3-2H31L21 0h-4l5 10H10L6 5H3l2 7-2 7h3l4-5h12l-5 10h4l10-10h13c1.4 0 3-.6 3-2Z" fill="currentColor"/></symbol>
+  </svg>
+
+  <script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/topojson-client@3/dist/topojson-client.min.js"></script>
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>
